@@ -1,57 +1,40 @@
 #include <iostream>
-#include <array>
+#include <vector>
 
-struct Sequence {
-    int index;
-    std::size_t length;
-    constexpr int next(int x) {return x + 1;}
-    constexpr bool isPart(int x, int y) {return y == next(x);}
-};
-// Returns index to start of longest increasing seq
-template<typename T, std::size_t SIZE>
-int longest(std::array<T, SIZE>& input) {
-    Sequence longest{0, SIZE};
-    Sequence current{0, SIZE};
+constexpr int delta = -1; // difference between neighbors
 
-    int previous = input.front();
-    for(auto from = input.begin(); from < input.end() ; ++from) {
-        for(auto to = input.begin() + 1; to < input.end() ; ++to) {
-            if(*from == *to) {
-                current.index = from - input.begin();
-                current.length = to - from + 1;
-            }
-            else
-                break;
+/* returns the position after last in sequence */
+template<typename T>
+auto findSeqEnd(T start, T end) {
+    auto endsAt = start + 1;
+    for(; endsAt < end; ++endsAt) {
+        if(*endsAt != (*(endsAt - 1) + delta)) {
+            break;
         }
     }
-
-    return SIZE;
+    return endsAt;
 }
-
-template<typename T, std::size_t SIZE>
-auto sequence(std::array<T, SIZE>& input, long startIndex) {
-    int startValue = input[startIndex];
-    auto index = input.begin() + startIndex;
-    for(; index < input.end(); ++index) {
-        if(*index != startValue) {
-            break;;
+template<typename T>
+auto findLongestSeq(T &nums) {
+    auto length = 0;
+    auto longestStart = nums.begin();
+    auto longestLen = 0;
+    for(auto from = nums.begin(); from < nums.end(); ) {
+        auto end = findSeqEnd(from, nums.end());
+        length = end - from;
+        if(length > longestLen) {
+            longestLen = length;
+            longestStart = from;
         }
+        from = end;
     }
-    return std::pair{startIndex, (index - input.begin())};
-}
-
-template<typename T, std::size_t SIZE>
-auto findSeqEnd(std::array<T, SIZE>& input, int startIndex, int (*step)(int stepSize)) {
-
-    return 0;
+    return std::pair{longestStart, longestLen};
 }
 
 int main() {
-    // deduction guide for array creation (since C++17)
-    std::array nums{1,2,3,1,2,3,4,1,2,3,4,5,1,2,3,1,1,1};
-    auto [x, y] = sequence(nums, 0);
-    std::cout << "x: " << x << " y: " << y << std::endl;
-    auto [x1, y1] = sequence(nums, 15);
-    std::cout << "x: " << x1 << " y: " << y1 << std::endl;
-    // std::cout << longest(nums) << std::endl;
+    // std::vector nums{1,2,3,1,2,3,4,1,2,3,4,5,1,2,3,1,1,1};
+    std::vector nums{1,2,3,4,5,6,10,9};
+    auto [start, length] = findLongestSeq(nums);
+
+    std::cout << "From: " << (start - nums.begin()) << " length: " << length << std::endl;
 }
