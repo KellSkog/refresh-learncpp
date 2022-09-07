@@ -1,0 +1,22 @@
+The task is solved writing code directly in the web browser.
+
+Please try the Trial Test https://app.futureskill.com/trialTest
+first to get a feeling for the interface.
+
+Make sure you have an undisturbed environment with no interruptions when you start the test.
+The timer cannot be paused once the test is started.
+If the test is interrupted you can re-enter the test via the ticket URL.
+
+Pointers for solving the task successfully:
+
+You can add prints in your code and import language specific libraries - try it out in the demo task above
+You can add your own helper functions and methods
+Please read the full instructions and think through how to solve the task before you start coding
+Be careful to cover borderline cases like empty arrays or large numbers
+You can test run your code on the "levels" in the bottom left.
+Note that when the result is evaluated different test cases will be used
+Keep track of time so you finalize the code before the time is up
+If you want to practise more before taking the test check out Future Skill’s exercises
+For the purposes of this test, internet searches or other help is not allowed.
+The only exception is general language help, like library documentation or tutorials.
+By taking this test you accept this policy and vow to solve the task on your own.
