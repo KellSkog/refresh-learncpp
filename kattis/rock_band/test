@@ -1,0 +1,8 @@
+#/usr/bin/bash
+./build/rock_band/rock_band < input1
+#echo "\n"
+./build/rock_band/rock_band < input2
+#echo "\n"
+./build/rock_band/rock_band < input3
+#echo "\n"
+./build/rock_band/rock_band < input4
