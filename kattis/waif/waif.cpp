@@ -22,35 +22,8 @@ struct Category {
 };
 using Categories = std::vector<Category>;
 
-int main() {
-  std::uint32_t childCount;
-  std::uint32_t toyCount;
-  std::uint32_t categoryCount;
-
-  std::cin >> childCount >> toyCount >> categoryCount;
-
-  Children children(childCount);
-  for (std::uint32_t child = 0; child < childCount; ++child) {
-    std::uint32_t toys;
-    std::cin >> toys;
-    children[child] = ChildToyList(toys);
-    for (int i = 0; i < toys; ++i) {
-      std::cin >> children[child][i];
-    }
-  }
-
-  Categories categories(categoryCount);
-  for (std::uint32_t category = 0; category < categoryCount; ++category) {
-    std::uint32_t toys;
-    std::cin >> toys;
-
-    categories[category] = Category{0, ChildToyList(toys)};
-    for (int i = 0; i < toys; ++i) {
-      std::cin >> categories[category].toysOfCategory[i];
-    }
-    std::cin >> categories[category].limit;
-  }
-
+template <typename T, typename S>
+[[maybe_unused]] void showContent(T children, S categories) {
   for (auto x : children) {
     for (auto y : x) {
       std::cout << y << ", ";
@@ -64,11 +37,43 @@ int main() {
     std::cout << x.limit << "\n";
   }
 }
+int main() {
+  std::uint32_t childCount;
+  std::uint32_t toyCount;
+  std::uint32_t categoryCount;
+
+  std::cin >> childCount >> toyCount >> categoryCount;
+
+  Children children(childCount);
+  for (std::uint32_t child = 0; child < childCount; ++child) {
+    std::uint32_t toys;
+    std::cin >> toys;
+    children[child] = ChildToyList(toys);
+    for (std::uint32_t i = 0; i < toys; ++i) {
+      std::cin >> children[child][i];
+    }
+  }
+
+  Categories categories(categoryCount);
+  for (std::uint32_t category = 0; category < categoryCount; ++category) {
+    std::uint32_t toys;
+    std::cin >> toys;
+
+    categories[category] = Category{0, ChildToyList(toys)};
+    for (std::uint32_t i = 0; i < toys; ++i) {
+      std::cin >> categories[category].toysOfCategory[i];
+    }
+    std::cin >> categories[category].limit;
+  }
+
+  showContent(children, categories);
+}
 
 /* https://linuxhint.com/vector-of-vectors-cpp/ */
 [[maybe_unused]] void vectors() {
   using namespace std;
   using Vchar = vector<char>;
+  using size_type = std::vector<Vchar>::size_type;
   vector<Vchar> twoDV = {{'A', 'B', 'C', 'D', 'E'},  // p
                          {'B', 'C', 'D', 'E', 'A'},  // Will be erased
                          {'C', 'D', 'E', 'A', 'B'},  // Up to q will be erased
@@ -83,8 +88,8 @@ int main() {
 
   twoDV.erase(p, q);
 
-  for (int i = 0; i < twoDV.size(); i++) {
-    for (int j = 0; j < twoDV[i].size(); j++) {
+  for (size_type i = 0; i < twoDV.size(); i++) {
+    for (size_type j = 0; j < twoDV[i].size(); j++) {
       cout << twoDV[i][j] << ' ';
     }
     cout << endl;
