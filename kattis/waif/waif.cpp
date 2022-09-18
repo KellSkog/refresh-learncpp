@@ -5,6 +5,7 @@
  */
 #include "waif.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <set>
 // #include <typeinfo>
@@ -16,17 +17,19 @@
 
 template <typename T, typename S>
 [[maybe_unused]] void showContent(T &children, S &categories) {
+  std::cout << "Wanted toys:\n";
   for (const auto &x : children) {
     for (const auto &y : x) {
       std::cout << y << ", ";
     }
     std::cout << "\n";
   }
+  std::cout << "Categorized toys:\n";
   for (const auto &x : categories) {
     for (const auto &y : x.toysOfCategory) {
       std::cout << y << ", ";
     }
-    std::cout << x.limit << "\n";
+    std::cout << " Limit " << x.limit << "\n";
   }
 }
 int main() {
@@ -80,45 +83,44 @@ int main() {
     }
     std::cin >> categories[category].limit;
   }
+  // Sort children from shortest to longest toylist
+  std::sort(children.begin(), children.end(),
+            [](ToyList a, ToyList b) { return a.size() < b.size(); });
+  // Sort categories from shortest to longest toylist
+  std::sort(categories.begin(), categories.end(), [](Category a, Category b) {
+    return a.toysOfCategory.size() < b.toysOfCategory.size();
+  });
+  // showContent(children, categories);
 
   // From set of uncathegorized toys give toy to children
-  // TODO: Should iterate over children from shortest prefered list to longest -> satisfy pickest
-  // child first
-  for (auto childPreferedToysList = children.begin(); childPreferedToysList < children.end();
-       ++childPreferedToysList) {
-    for (const auto prefeferdToy : *childPreferedToysList) {
-      for (auto toy = uncategorized.begin(); toy != uncategorized.end(); ++toy) {
-        // std::cout << "Prefered toy: " << prefeferdToy << " Toy: " << *toy
-        //           << " Child: " << (childPreferedToysList - children.begin() + 1) << "\n ";
-        if (*toy == prefeferdToy) {  // In a childs prefered list
-          satisfiedCount++;
-          children.erase(childPreferedToysList);
-          uncategorized.erase(toy);
-          goto childSatisfied;
-        }
-      }
-      // TODO: Should search ctegories from shortest to longest toylist -> Restrict as few toys as
-      // possible
-      for (auto category = categories.begin(); category < categories.end(); ++category) {
-        for (auto toy = category->toysOfCategory.begin(); toy < category->toysOfCategory.end();
-             ++toy) {
-          // std::cout << "Prefered toy: " << prefeferdToy << " Toy: " << *toy
-          //           << " Child: " << (childPreferedToysList - children.begin() + 1) << "\n ";
-          if (*toy == prefeferdToy && category->limit > 0) {  // In a childs prefered list
+  for (auto childIterator = children.begin(); childIterator < children.end();
+       ++childIterator) {  // Iterate over children
+    for (auto prefeferdToyIterator = (*childIterator).begin();
+         prefeferdToyIterator != (*childIterator).end(); ++prefeferdToyIterator) {
+      if (auto ptr = uncategorized.find(*prefeferdToyIterator); ptr != uncategorized.end()) {
+        satisfiedCount++;
+        uncategorized.erase(ptr);
+        // The child needs no furtherprocessing
+        goto nextChild;
+      } else {
+        for (auto category = categories.begin(); category < categories.end(); ++category) {
+          if (auto toyInCategory = std::find(category->toysOfCategory.begin(),
+                                             category->toysOfCategory.end(), *prefeferdToyIterator);
+              toyInCategory != category->toysOfCategory.end() && category->limit > 0) {
             satisfiedCount++;
-            children.erase(childPreferedToysList);
-            category->toysOfCategory.erase(toy);
-            category->limit--;
-            goto childSatisfied;
+            category->toysOfCategory.erase(toyInCategory);
+            --category->limit;
+            // The child needs np furtherprocessing
+            goto nextChild;
           }
         }
-      }
+      }  // else
     }
-  childSatisfied:;
+  nextChild:;
   }
 
   std::cout << satisfiedCount << std::endl;
-  //   showContent(children, categories);
+  // showContent(children, categories);
 }
 
 /* https://linuxhint.com/vector-of-vectors-cpp/ */
