@@ -3,17 +3,31 @@
  * that can be satisfied with a toy that they like,
  * provided that each toy can be used by at most one child.
  */
-#include "waif.hpp"
 
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <iostream>
-#include <set>
-// #include <typeinfo>
 
 /*
  * Toys in category 0 has no category, any number can be played with
  *
  */
+
+struct Toy;
+using ToyList = std::vector<Toy *>;
+struct Category {
+  std::uint32_t limit;
+  ToyList toysOfCategory;
+};
+using Categories = std::vector<Category>;  // Limits only
+
+struct Toy {
+  bool isTaken;
+  Category *category;
+  std::uint32_t interestCount;
+};
+using Children = std::vector<ToyList>;
 
 template <typename T, typename S>
 [[maybe_unused]] void showContent(T &children, S &categories) {
@@ -32,6 +46,13 @@ template <typename T, typename S>
     std::cout << " Limit " << x.limit << "\n";
   }
 }
+bool isAvailable(Toy *toy) {
+  if (toy->category)
+    return ((!toy->isTaken) && (toy->category->limit > 0));
+  else {  // Uncategorized
+    return (!toy->isTaken);
+  }
+}
 int main() {
   std::uint32_t childCount;
   std::uint32_t toyCount;
@@ -40,9 +61,9 @@ int main() {
 
   std::cin >> childCount >> toyCount >> categoryCount;
 
-  /* First fill uncategorized set with all toys
+  /* First fill setOfToys set with all toys
    * Build vector of children with set of prefered toys
-   * Build vector of categories with set of toys, take from uncategorized set
+   * Build vector of categories with set of toys, take from setOfToys set
    * From set of uncathegorized toys give toy to children from shortest prefered list to longest
    * Update satisfied count and remove child that has received toy
    *
@@ -51,102 +72,56 @@ int main() {
    * Update satisfied count, remove toy from category and subtract from limit, skip to next child
    */
 
-  // First fill uncategorized set with all toys
-  //   std::vector<std::uint32_t> uncategorized(toyCount);
-  std::set<std::uint32_t> uncategorized;
+  // First fill setOfToys set with all toys
+  std::array<Toy, 101> setOfToys;
   for (std::uint32_t toy = 1; toy <= toyCount; ++toy) {
-    uncategorized.insert(toy);
+    setOfToys[toy] = Toy{false, nullptr, 0};  // Create 101 not given, uncathegorized toys, wanted by no one
   }
 
-  Children children(childCount);
-  for (std::uint32_t child = 0; child < childCount; ++child) {
-    std::uint32_t toys;
-    std::cin >> toys;
-    children[child] = ToyList(toys);
-    for (std::uint32_t i = 0; i < toys; ++i) {
-      std::cin >> children[child][i];
+  Children children(childCount + 1);  // Each child in children has a vector of pointers to toy
+  for (std::uint32_t child = 1; child <= childCount; ++child) {
+    std::uint32_t toyCount;
+    std::cin >> toyCount;  // No of toys in this childs prefered list
+    children[child] = ToyList(toyCount);
+    for (std::uint32_t i = 0; i < toyCount; ++i) {
+      std::uint32_t toy;
+      std::cin >> toy;
+      Toy *theToy = &setOfToys[toy];
+      children[child][i] = theToy;
+      theToy->interestCount++;
     }
   }
 
-  Categories categories(categoryCount);
-  for (std::uint32_t category = 0; category < categoryCount; ++category) {
+  Categories categories(categoryCount + 1);
+  for (std::uint32_t category = 1; category <= categoryCount; ++category) {
     std::uint32_t toys;
     std::cin >> toys;
 
-    categories[category] = Category{0, ToyList(toys)};
     for (std::uint32_t i = 0; i < toys; ++i) {
       std::uint32_t toy;
       std::cin >> toy;
-      categories[category].toysOfCategory[i] = toy;  // Move the toy from uncathegorized
-      auto ptr = uncategorized.find(toy);
-      uncategorized.erase(ptr);
+      setOfToys[toy].category = &categories[category];  // Assign the toy to its category
     }
     std::cin >> categories[category].limit;
   }
   // Sort children from shortest to longest toylist
-  std::sort(children.begin(), children.end(),
-            [](ToyList a, ToyList b) { return a.size() < b.size(); });
-  // Sort categories from shortest to longest toylist
-  std::sort(categories.begin(), categories.end(), [](Category a, Category b) {
-    return a.toysOfCategory.size() < b.toysOfCategory.size();
-  });
-  // showContent(children, categories);
+  std::sort(children.begin(), children.end(), [](ToyList a, ToyList b) { return a.size() < b.size(); });
 
-  // From set of uncathegorized toys give toy to children
-  for (auto childIterator = children.begin(); childIterator < children.end();
-       ++childIterator) {  // Iterate over children
-    for (auto prefeferdToyIterator = (*childIterator).begin();
-         prefeferdToyIterator != (*childIterator).end(); ++prefeferdToyIterator) {
-      if (auto ptr = uncategorized.find(*prefeferdToyIterator); ptr != uncategorized.end()) {
+  for (auto child : children) {  // Sort prefered toys list based on interest
+    std::sort(child.begin(), child.end(), [](Toy *a, Toy *b) { return a->interestCount < b->interestCount; });
+  }
+  for (auto &child : children) {
+    for (auto *toy : child) {
+      if (isAvailable(toy)) {  // If this prefered toy is available (not taken nor in an exhausted category)
+        toy->isTaken = true;
         satisfiedCount++;
-        uncategorized.erase(ptr);
-        // The child needs no furtherprocessing
-        goto nextChild;
-      } else {
-        for (auto category = categories.begin(); category < categories.end(); ++category) {
-          if (auto toyInCategory = std::find(category->toysOfCategory.begin(),
-                                             category->toysOfCategory.end(), *prefeferdToyIterator);
-              toyInCategory != category->toysOfCategory.end() && category->limit > 0) {
-            satisfiedCount++;
-            category->toysOfCategory.erase(toyInCategory);
-            --category->limit;
-            // The child needs np furtherprocessing
-            goto nextChild;
-          }
+        if (toy->category) {
+          --toy->category->limit;
         }
-      }  // else
+      }
     }
-  nextChild:;
   }
 
   std::cout << satisfiedCount << std::endl;
   // showContent(children, categories);
-}
-
-/* https://linuxhint.com/vector-of-vectors-cpp/ */
-[[maybe_unused]] void vectors() {
-  using namespace std;
-  using Vchar = vector<char>;
-  using size_type = std::vector<Vchar>::size_type;
-  vector<Vchar> twoDV = {{'A', 'B', 'C', 'D', 'E'},  // p
-                         {'B', 'C', 'D', 'E', 'A'},  // Will be erased
-                         {'C', 'D', 'E', 'A', 'B'},  // Up to q will be erased
-                         {'D', 'E', 'A', 'B', 'C'},
-                         {'E', 'A', 'B', 'C', 'D'}};
-
-  vector<Vchar>::iterator p = twoDV.begin();
-  p++;
-  vector<Vchar>::iterator q = twoDV.end();
-  q--;
-  q--;
-
-  twoDV.erase(p, q);
-
-  for (size_type i = 0; i < twoDV.size(); i++) {
-    for (size_type j = 0; j < twoDV[i].size(); j++) {
-      cout << twoDV[i][j] << ' ';
-    }
-    cout << endl;
-  }
-  cout << endl;
 }
