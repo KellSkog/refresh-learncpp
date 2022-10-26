@@ -19,8 +19,9 @@ using ToyList = std::vector<Toy *>;
 struct Category {
   std::uint32_t limit;
   ToyList toysOfCategory;
+  std::uint32_t interest;
 };
-using Categories = std::vector<Category>;  // Limits only
+using Categories = std::vector<Category>;
 
 struct Toy {
   bool isTaken;
@@ -100,6 +101,7 @@ int main() {
     for (std::uint32_t i = 0; i < toys; ++i) {
       std::uint32_t toy;
       std::cin >> toy;
+      categories[category].interest += setOfToys[toy].interestCount;
       setOfToys[toy].category = &categories[category];  // Assign the toy to its category
     }
     std::cin >> categories[category].limit;
