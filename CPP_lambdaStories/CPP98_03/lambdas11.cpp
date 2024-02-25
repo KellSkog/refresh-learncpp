@@ -55,7 +55,7 @@ void useLocalFunctionObject() {
     std::for_each(v.begin(), v.end(), LocalPrinter());
 }
 
-int stdBind() {
+size_t stdBind() {
     using std::placeholders::_1;
     
     std::vector<int> v;

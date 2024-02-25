@@ -2,12 +2,12 @@ namespace std98 {
     void doIt();
     void usePrintFunc();
     void usePrinterEx();
-    int main();
+    size_t bind2nd();
     
 }
 namespace std11 {
     void doIt();
     void usePrinterEx();
     void useLocalFunctionObject();
-    int stdBind();
+    size_t stdBind();
 }
