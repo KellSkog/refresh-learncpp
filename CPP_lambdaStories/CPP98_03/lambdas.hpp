@@ -1,3 +1,5 @@
+#include <string>
+
 namespace std98 {
     void doIt();
     void usePrintFunc();
@@ -10,4 +12,6 @@ namespace std11 {
     void usePrinterEx();
     void useLocalFunctionObject();
     size_t stdBind();
+    // template<typename L>
+    // std::string lambda_Type(L&& lambda);
 }

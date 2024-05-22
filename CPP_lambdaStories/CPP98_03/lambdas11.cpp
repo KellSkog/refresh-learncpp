@@ -69,4 +69,8 @@ size_t stdBind() {
 
     return val;
 }
+// template<typename L>
+//     std::string lambda_Type(L&& lambda) {
+//         return typeid(lambda).name();
+//     }
 }
