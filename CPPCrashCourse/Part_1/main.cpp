@@ -198,6 +198,19 @@ TEST_CASE("Part_1") {
             std::cout << myPair << "\n";
             Philosofy::MyPair myPair2{42, 42.5};
             std::cout << myPair2 << "\n";
+
+            // Don't use raw new and delete!
+            Philosofy::Shape* sqr_p = new Philosofy::Rectangle{};
+            sqr_p->setWidth(5);
+            sqr_p->setHeight(5); //Hmmm....
+            CHECK_EQ(sqr_p->area(), 25);
+            delete sqr_p;
+
+            using MyProject = Philosofy::Project2<Philosofy::FrontEndDev2, Philosofy::BackEndDev2>;
+            auto alice = Philosofy::FrontEndDev2{};
+            auto bob = Philosofy::BackEndDev2{};
+            auto new_project = MyProject{{alice, bob}};
+            new_project.deliver();
         }
     }
 } // TEST_CASE("Part_1")

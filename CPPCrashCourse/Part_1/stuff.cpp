@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "stuff.hpp"
 
 size_t Philosofy::count_dots(std::string_view str) {
@@ -27,3 +29,26 @@ std::ostream &Philosofy::operator<<(std::ostream &stream, [[maybe_unused]] const
     stream << "Oh no not an int and a double =:-o\n";
     return stream;
 }
+
+void Philosofy::FrontEndDev::developFrontEnd() {}
+void Philosofy::BackEndDev::developBackEnd() {}
+
+inline void Philosofy::Proj::deliver() {
+    for (auto &developer : developers_) {
+        developer->develop();
+    }
+}
+
+void Philosofy::FrontEndDev2::developFrontEnd() {
+    std::cout << "Developing front end stuff\n";
+}
+void Philosofy::BackEndDev2::developBackEnd() {
+    std::cout << "Developing back end stuff\n";
+}
+template<class... Devs> void Philosofy::Project2<Devs...>::deliver() {
+    for (auto &developer : developers_) {
+            std::visit([](auto &dev) { dev.develop(); }, developer);
+    }
+}
+/* Instantiate template*/
+template void Philosofy::Project2<Philosofy::FrontEndDev2, Philosofy::BackEndDev2>::deliver();
